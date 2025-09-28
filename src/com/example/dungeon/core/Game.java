@@ -29,7 +29,20 @@ public class Game {
         });
         commands.put("look", (ctx, a) -> System.out.println(ctx.getCurrent().describe()));
         commands.put("move", (ctx, a) -> {
-            throw new InvalidCommandException("TODO-1: реализуйте перемещение игрока");
+            if (a.size() != 1) {
+                throw new InvalidCommandException("Путь указан некоректно, команда look - покажет доступные выходы");
+            }
+            String way = a.getFirst().toLowerCase();
+            Room myRoom = ctx.getCurrent();
+            Room room2 = myRoom.getNeighbors().get(way);
+            if (room2 != null) {
+                ctx.setCurrent(room2);
+                System.out.println("Вы вошли в комнату: "+room2.getName());
+                System.out.println(room2.describe());   // show look
+            } else {
+                throw new InvalidCommandException(way + "- этот выход закрыт, команда look - покажет доступные выходы");
+            }
+            // throw new InvalidCommandException("TODO-1: реализуйте перемещение игрока");
         });
         commands.put("take", (ctx, a) -> {
             throw new InvalidCommandException("TODO-2: реализуйте взятие предмета");
