@@ -45,7 +45,23 @@ public class Game {
             // throw new InvalidCommandException("TODO-1: реализуйте перемещение игрока");
         });
         commands.put("take", (ctx, a) -> {
-            throw new InvalidCommandException("TODO-2: реализуйте взятие предмета");
+            if (a.size() < 1) {
+                throw new InvalidCommandException("Не выбран предмет");
+            }
+            String nameItem = String.join(" ", a);
+            Room myRoom = ctx.getCurrent();
+            Optional<Item> findItem = myRoom.getItems().stream()
+                    .filter(item -> item.getName().equalsIgnoreCase(nameItem))
+                    .findFirst();
+            if (findItem.isPresent()) {
+                Item item = findItem.get();
+                myRoom.getItems().remove(item);
+                ctx.getPlayer().getInventory().add(item);
+                System.out.println("Взят: "+item.getName());
+            } else {
+                throw new InvalidCommandException(nameItem+" - нет такого предмета");
+            }
+            // throw new InvalidCommandException("TODO-2: реализуйте взятие предмета");
         });
         commands.put("inventory", (ctx, a) -> {
             System.out.println("TODO-3: вывести инвентарь (Streams)");
