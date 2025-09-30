@@ -6,6 +6,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class Game {
     private final GameState state = new GameState();
@@ -64,10 +65,36 @@ public class Game {
             // throw new InvalidCommandException("TODO-2: реализуйте взятие предмета");
         });
         commands.put("inventory", (ctx, a) -> {
-            System.out.println("TODO-3: вывести инвентарь (Streams)");
+            List<Item> inventory = ctx.getPlayer().getInventory();
+            if (inventory.isEmpty()) {
+                System.out.println("Инвентаря нет.");
+                return;
+            }
+            // Группировка по типу предмета + сортировка по имени
+            Map<String, List<Item>> grouped = inventory.stream()
+                    .sorted(Comparator.comparing(Item::getName))
+                    .collect(Collectors.groupingBy(i -> i.getClass().getSimpleName(), LinkedHashMap::new, Collectors.toList()));
+
+            grouped.forEach((type, items) -> {
+                System.out.printf("- %s (%d): %s%n", type, items.size(),
+                        items.stream().map(Item::getName).collect(Collectors.joining(", ")));
+            });
+            //  System.out.println("TODO-3: вывести инвентарь (Streams)");
         });
         commands.put("use", (ctx, a) -> {
-            throw new InvalidCommandException("TODO-4: реализуйте использование предмета");
+            if (a.isEmpty()) {
+                throw new InvalidCommandException("Не выбран предмета использования");
+            }
+            String nameItem = String.join(" ", a);
+            Player player = ctx.getPlayer();
+            Optional<Item> findItem = player.getInventory().stream()
+                    .filter(i -> i.getName().equalsIgnoreCase(nameItem)).findFirst();
+            if (findItem.isEmpty()) {
+                throw new InvalidCommandException("У Вас нет такого предмета: " + nameItem);
+            }
+            Item item = findItem.get();
+            item.apply(ctx);
+            //  throw new InvalidCommandException("TODO-4: реализуйте использование предмета");
         });
         commands.put("fight", (ctx, a) -> {
             throw new InvalidCommandException("TODO-5: реализуйте бой");
@@ -94,6 +121,8 @@ public class Game {
         cave.getNeighbors().put("west", forest);
 
         forest.getItems().add(new Potion("Малое зелье", 5));
+        cave.getItems().add(new Potion("Настойка мухоморов", 25));
+        square.getItems().add(new Potion("Пиво гномов", 10));
         forest.setMonster(new Monster("Волк", 1, 8));
 
         state.setCurrent(square);
