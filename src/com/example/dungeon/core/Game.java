@@ -97,7 +97,46 @@ public class Game {
             //  throw new InvalidCommandException("TODO-4: реализуйте использование предмета");
         });
         commands.put("fight", (ctx, a) -> {
-            throw new InvalidCommandException("TODO-5: реализуйте бой");
+            Room room = ctx.getCurrent();
+            Monster monster = room.getMonster();
+            if (monster == null) {
+                throw new InvalidCommandException("Битвы не будет, тут монстров нет.");
+            }
+            Player player = ctx.getPlayer();
+            System.out.println("И вот начинается бой, монстр:" + monster.getName() +
+                               " (ур." + monster.getLevel() + ")");
+
+            try {
+                while (player.getHp() > 0 && monster.getHp() > 0) {
+                    // player's kick
+                    int playerAttack = player.getAttack();
+                    monster.setHp(monster.getHp() - playerAttack);
+                    System.out.printf("Ваш удар по монстру %s сила %d HP. Жизнь монстра, HP: %d%n",
+                            monster.getName(), playerAttack, Math.max(monster.getHp(), 0));
+                    if (monster.getHp() <= 0) break;
+                    // monster's kick
+                    int monsterAttack = monster.getLevel();
+                    player.setHp(player.getHp() - monsterAttack);
+                    System.out.printf("Атака монстра %d. Ваша жизнь, HP: %d%n",
+                            monsterAttack, Math.max(player.getHp(), 0));
+                    if (player.getHp() <= 0) break;
+                }
+            } catch (Exception e) {
+                System.out.println("В бою что то пошло не так: " + e.getMessage());
+            }
+            // win
+            if (monster.getHp() <= 0) {
+                System.out.println("Победа. Враг уничтожен!");
+                room.setMonster(null);
+                room.getItems().add(new Potion("Сердце монстра", 13));
+                System.out.println("Приз!!! Монстр потерял свое сердце.");
+            }
+            // lose
+            if (player.getHp() <= 0) {
+                System.out.println("Game over. Вы убиты.");
+                System.exit(0);
+            }
+          //  throw new InvalidCommandException("TODO-5: реализуйте бой");
         });
         commands.put("save", (ctx, a) -> SaveLoad.save(ctx));
         commands.put("load", (ctx, a) -> SaveLoad.load(ctx));
@@ -124,6 +163,7 @@ public class Game {
         cave.getItems().add(new Potion("Настойка мухоморов", 25));
         square.getItems().add(new Potion("Пиво гномов", 10));
         forest.setMonster(new Monster("Волк", 1, 8));
+        cave.setMonster(new Monster("Жуткий дракон", 3, 50));
 
         state.setCurrent(square);
     }
