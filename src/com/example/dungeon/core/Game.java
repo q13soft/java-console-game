@@ -141,6 +141,7 @@ public class Game {
         commands.put("save", (ctx, a) -> SaveLoad.save(ctx));
         commands.put("load", (ctx, a) -> SaveLoad.load(ctx));
         commands.put("scores", (ctx, a) -> SaveLoad.printScores());
+        commands.put("about", (ctx, a) -> System.out.println("Программа, версия 1.00"));
         commands.put("exit", (ctx, a) -> {
             System.out.println("Пока!");
             System.exit(0);
